@@ -1,0 +1,753 @@
+--
+-- PostgreSQL database dump
+--
+
+SET client_encoding = 'EUC_JP';
+SET check_function_bodies = false;
+
+SET SESSION AUTHORIZATION 'postgres';
+
+SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 28 (OID 584092)
+-- Name: plpgsql_call_handler(); Type: FUNC PROCEDURAL LANGUAGE; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
+    AS '$libdir/plpgsql', 'plpgsql_call_handler'
+    LANGUAGE c;
+
+
+SET SESSION AUTHORIZATION DEFAULT;
+
+--
+-- TOC entry 26 (OID 584093)
+-- Name: plpgsql; Type: PROCEDURAL LANGUAGE; Schema: public; Owner: 
+--
+
+CREATE TRUSTED PROCEDURAL LANGUAGE plpgsql HANDLER plpgsql_call_handler;
+
+
+--
+-- TOC entry 27 (OID 584093)
+-- Name: plpgsql; Type: ACL LANGUAGE; Schema: public; Owner: 
+--
+
+REVOKE ALL ON LANGUAGE plpgsql FROM PUBLIC;
+SET SESSION AUTHORIZATION postgres;
+GRANT ALL ON LANGUAGE plpgsql TO postgres WITH GRANT OPTION;
+RESET SESSION AUTHORIZATION;
+SET SESSION AUTHORIZATION postgres;
+GRANT ALL ON LANGUAGE plpgsql TO PUBLIC;
+RESET SESSION AUTHORIZATION;
+
+
+SET SESSION AUTHORIZATION 'postgres';
+
+--
+-- TOC entry 4 (OID 2200)
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+SET SESSION AUTHORIZATION 'postgres';
+
+--
+-- TOC entry 29 (OID 584092)
+-- Name: plpgsql_call_handler(); Type: ACL; Schema: public; Owner: postgres
+--
+
+REVOKE ALL ON FUNCTION plpgsql_call_handler() FROM PUBLIC;
+REVOKE ALL ON FUNCTION plpgsql_call_handler() FROM postgres;
+GRANT ALL ON FUNCTION plpgsql_call_handler() TO PUBLIC;
+
+
+SET SESSION AUTHORIZATION 'stock';
+
+--
+-- TOC entry 5 (OID 637336)
+-- Name: sq_contractor; Type: SEQUENCE; Schema: public; Owner: stock
+--
+
+CREATE SEQUENCE sq_contractor
+    START WITH 1
+    INCREMENT BY 1
+    MAXVALUE 99999
+    NO MINVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 7 (OID 637338)
+-- Name: sq_stocking; Type: SEQUENCE; Schema: public; Owner: stock
+--
+
+CREATE SEQUENCE sq_stocking
+    START WITH 1
+    INCREMENT BY 1
+    MAXVALUE 999999999
+    NO MINVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 9 (OID 637340)
+-- Name: m_contractor; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE m_contractor (
+    cont_id numeric(5,0) NOT NULL,
+    cont_cd character varying(10),
+    cont_nm character varying(50),
+    short_nm character varying(50),
+    discount numeric(3,0),
+    tax_flg character(1),
+    del_flg character(1),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 10 (OID 637344)
+-- Name: m_cont_item; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE m_cont_item (
+    cont_id numeric(5,0) NOT NULL,
+    orca_med_cd character varying(15) NOT NULL,
+    item_no character varying(20) NOT NULL,
+    med_nm character varying(60),
+    med_kn character varying(60),
+    med_kind1 character varying(2),
+    med_kind2 character varying(2),
+    med_kind3 character varying(2),
+    pack_unit3 numeric(10,3),
+    pack_unit2 numeric(10,3),
+    pack_unit1 numeric(10,3),
+    unit_price numeric(9,2),
+    discount numeric(3,0),
+    del_flg character(1),
+    hacchu_p numeric(10,3),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 11 (OID 637348)
+-- Name: m_orca_medicine; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE m_orca_medicine (
+    orca_med_cd character varying(15) NOT NULL,
+    day_from character varying(8) NOT NULL,
+    day_to character varying(8) NOT NULL,
+    med_nm character varying(60),
+    med_kn character varying(60),
+    unit_nm character varying(10),
+    med_kind character varying(2),
+    med_price numeric(8,2),
+    kousei_cd character varying(15),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 12 (OID 637352)
+-- Name: m_med_kind; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE m_med_kind (
+    stock_med_kind character varying(2) NOT NULL,
+    orca_med_kind character varying(2) NOT NULL,
+    med_kind_name character varying(20),
+    del_flg character(1),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 13 (OID 637356)
+-- Name: t_stocking; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE t_stocking (
+    stc_id numeric(10,0) NOT NULL,
+    stc_date character varying(8),
+    stc_cd character(1),
+    cont_id numeric(5,0),
+    item_no character varying(20),
+    stc_unit numeric(10,2),
+    stc_num numeric(10,3),
+    tax_flg character(1),
+    amount numeric(14,2),
+    discount numeric(10,2),
+    stc_amount numeric(14,2),
+    tax numeric(10,2),
+    pack3_num numeric(10,0),
+    pack2_num numeric(10,0),
+    pack1_num numeric(10,3),
+    del_flg character(1),
+    slip_no character varying(20),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 14 (OID 637360)
+-- Name: t_stock; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE t_stock (
+    yyyymm character(6) NOT NULL,
+    item_no character varying(20) NOT NULL,
+    unit_price numeric(10,2),
+    amount numeric(14,2),
+    before_stock numeric(10,3),
+    stocking_num numeric(10,3),
+    expend_num numeric(10,3),
+    adjust_num numeric(10,3),
+    stock_num numeric(10,3),
+    med_kind1 character varying(2),
+    med_kind2 character varying(2),
+    med_kind3 character varying(2),
+    del_flg character(1),
+    total_num numeric(10,3),
+    total_amount numeric(14,2),
+    back_num numeric(10,3),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 15 (OID 637364)
+-- Name: t_expend; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE t_expend (
+    exp_date character(8) NOT NULL,
+    orca_user numeric(10,0) NOT NULL,
+    orca_med_cd character varying(15) NOT NULL,
+    insurance character(3),
+    expend_num numeric(10,3),
+    name character varying(100),
+    orca_user_no character varying(20),
+    hospnum numeric(2,0) NOT NULL
+);
+
+
+--
+-- TOC entry 16 (OID 637368)
+-- Name: t_stock_list02; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE t_stock_list02 (
+    item_no character varying(20) NOT NULL,
+    med_nm character varying(60),
+    expend_rank numeric(4,0),
+    margin_rank numeric(4,0),
+    med_price numeric(10,2),
+    stc_price numeric(10,2),
+    margin numeric(10,2),
+    unit_nm character varying(10),
+    expend_num numeric(10,2),
+    expend_price numeric(10,2),
+    margin_price numeric(10,2),
+    med_kind1 character varying(2),
+    hospnum numeric(2,0)
+);
+
+
+--
+-- TOC entry 17 (OID 637370)
+-- Name: t_stock_invent; Type: TABLE; Schema: public; Owner: stock
+--
+
+CREATE TABLE t_stock_invent (
+    yyyymm character(10) NOT NULL,
+    item_no character varying(20) NOT NULL,
+    stock_theory numeric(10,3),
+    stock_truth numeric(10,3),
+    flag_truth character(1),
+    hospnum numeric(2,0)
+);
+
+
+--
+-- Data for TOC entry 30 (OID 637340)
+-- Name: m_contractor; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY m_contractor (cont_id, cont_cd, cont_nm, short_nm, discount, tax_flg, del_flg, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 31 (OID 637344)
+-- Name: m_cont_item; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY m_cont_item (cont_id, orca_med_cd, item_no, med_nm, med_kn, med_kind1, med_kind2, med_kind3, pack_unit3, pack_unit2, pack_unit1, unit_price, discount, del_flg, hacchu_p, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 32 (OID 637348)
+-- Name: m_orca_medicine; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY m_orca_medicine (orca_med_cd, day_from, day_to, med_nm, med_kn, unit_nm, med_kind, med_price, kousei_cd, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 33 (OID 637352)
+-- Name: m_med_kind; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY m_med_kind (stock_med_kind, orca_med_kind, med_kind_name, del_flg, hospnum) FROM stdin;
+01	01	内服	0	1
+04	04	注射	0	1
+06	06	外用	0	1
+01	01	内服	0	2
+04	04	注射	0	2
+06	06	外用	0	2
+01	01	内服	0	3
+04	04	注射	0	3
+06	06	外用	0	3
+01	01	内服	0	4
+04	04	注射	0	4
+06	06	外用	0	4
+01	01	内服	0	5
+04	04	注射	0	5
+06	06	外用	0	5
+01	01	内服	0	6
+04	04	注射	0	6
+06	06	外用	0	6
+01	01	内服	0	7
+04	04	注射	0	7
+06	06	外用	0	7
+01	01	内服	0	8
+04	04	注射	0	8
+06	06	外用	0	8
+01	01	内服	0	9
+04	04	注射	0	9
+06	06	外用	0	9
+01	01	内服	0	10
+04	04	注射	0	10
+06	06	外用	0	10
+01	01	内服	0	11
+04	04	注射	0	11
+06	06	外用	0	11
+01	01	内服	0	12
+04	04	注射	0	12
+06	06	外用	0	12
+01	01	内服	0	13
+04	04	注射	0	13
+06	06	外用	0	13
+01	01	内服	0	14
+04	04	注射	0	14
+06	06	外用	0	14
+01	01	内服	0	15
+04	04	注射	0	15
+06	06	外用	0	15
+01	01	内服	0	16
+04	04	注射	0	16
+06	06	外用	0	16
+01	01	内服	0	17
+04	04	注射	0	17
+06	06	外用	0	17
+01	01	内服	0	18
+04	04	注射	0	18
+06	06	外用	0	18
+01	01	内服	0	19
+04	04	注射	0	19
+06	06	外用	0	19
+01	01	内服	0	20
+04	04	注射	0	20
+06	06	外用	0	20
+01	01	内服	0	21
+04	04	注射	0	21
+06	06	外用	0	21
+01	01	内服	0	22
+04	04	注射	0	22
+06	06	外用	0	22
+01	01	内服	0	23
+04	04	注射	0	23
+06	06	外用	0	23
+01	01	内服	0	24
+04	04	注射	0	24
+06	06	外用	0	24
+01	01	内服	0	25
+04	04	注射	0	25
+06	06	外用	0	25
+01	01	内服	0	26
+04	04	注射	0	26
+06	06	外用	0	26
+01	01	内服	0	27
+04	04	注射	0	27
+06	06	外用	0	27
+01	01	内服	0	28
+04	04	注射	0	28
+06	06	外用	0	28
+01	01	内服	0	29
+04	04	注射	0	29
+06	06	外用	0	29
+01	01	内服	0	30
+04	04	注射	0	30
+06	06	外用	0	30
+01	01	内服	0	31
+04	04	注射	0	31
+06	06	外用	0	31
+01	01	内服	0	32
+04	04	注射	0	32
+06	06	外用	0	32
+01	01	内服	0	33
+04	04	注射	0	33
+06	06	外用	0	33
+01	01	内服	0	34
+04	04	注射	0	34
+06	06	外用	0	34
+01	01	内服	0	35
+04	04	注射	0	35
+06	06	外用	0	35
+01	01	内服	0	36
+04	04	注射	0	36
+06	06	外用	0	36
+01	01	内服	0	37
+04	04	注射	0	37
+06	06	外用	0	37
+01	01	内服	0	38
+04	04	注射	0	38
+06	06	外用	0	38
+01	01	内服	0	39
+04	04	注射	0	39
+06	06	外用	0	39
+01	01	内服	0	40
+04	04	注射	0	40
+06	06	外用	0	40
+01	01	内服	0	41
+04	04	注射	0	41
+06	06	外用	0	41
+01	01	内服	0	42
+04	04	注射	0	42
+06	06	外用	0	42
+01	01	内服	0	43
+04	04	注射	0	43
+06	06	外用	0	43
+01	01	内服	0	44
+04	04	注射	0	44
+06	06	外用	0	44
+01	01	内服	0	45
+04	04	注射	0	45
+06	06	外用	0	45
+01	01	内服	0	46
+04	04	注射	0	46
+06	06	外用	0	46
+01	01	内服	0	47
+04	04	注射	0	47
+06	06	外用	0	47
+01	01	内服	0	48
+04	04	注射	0	48
+06	06	外用	0	48
+01	01	内服	0	49
+04	04	注射	0	49
+06	06	外用	0	49
+01	01	内服	0	50
+04	04	注射	0	50
+06	06	外用	0	50
+01	01	内服	0	51
+04	04	注射	0	51
+06	06	外用	0	51
+01	01	内服	0	52
+04	04	注射	0	52
+06	06	外用	0	52
+01	01	内服	0	53
+04	04	注射	0	53
+06	06	外用	0	53
+01	01	内服	0	54
+04	04	注射	0	54
+06	06	外用	0	54
+01	01	内服	0	55
+04	04	注射	0	55
+06	06	外用	0	55
+01	01	内服	0	56
+04	04	注射	0	56
+06	06	外用	0	56
+01	01	内服	0	57
+04	04	注射	0	57
+06	06	外用	0	57
+01	01	内服	0	58
+04	04	注射	0	58
+06	06	外用	0	58
+01	01	内服	0	59
+04	04	注射	0	59
+06	06	外用	0	59
+01	01	内服	0	60
+04	04	注射	0	60
+06	06	外用	0	60
+01	01	内服	0	61
+04	04	注射	0	61
+06	06	外用	0	61
+01	01	内服	0	62
+04	04	注射	0	62
+06	06	外用	0	62
+01	01	内服	0	63
+04	04	注射	0	63
+06	06	外用	0	63
+01	01	内服	0	64
+04	04	注射	0	64
+06	06	外用	0	64
+01	01	内服	0	65
+04	04	注射	0	65
+06	06	外用	0	65
+01	01	内服	0	66
+04	04	注射	0	66
+06	06	外用	0	66
+01	01	内服	0	67
+04	04	注射	0	67
+06	06	外用	0	67
+01	01	内服	0	68
+04	04	注射	0	68
+06	06	外用	0	68
+01	01	内服	0	69
+04	04	注射	0	69
+06	06	外用	0	69
+01	01	内服	0	70
+04	04	注射	0	70
+06	06	外用	0	70
+01	01	内服	0	71
+04	04	注射	0	71
+06	06	外用	0	71
+01	01	内服	0	72
+04	04	注射	0	72
+06	06	外用	0	72
+01	01	内服	0	73
+04	04	注射	0	73
+06	06	外用	0	73
+01	01	内服	0	74
+04	04	注射	0	74
+06	06	外用	0	74
+01	01	内服	0	75
+04	04	注射	0	75
+06	06	外用	0	75
+01	01	内服	0	76
+04	04	注射	0	76
+06	06	外用	0	76
+01	01	内服	0	77
+04	04	注射	0	77
+06	06	外用	0	77
+01	01	内服	0	78
+04	04	注射	0	78
+06	06	外用	0	78
+01	01	内服	0	79
+04	04	注射	0	79
+06	06	外用	0	79
+01	01	内服	0	80
+04	04	注射	0	80
+06	06	外用	0	80
+01	01	内服	0	81
+04	04	注射	0	81
+06	06	外用	0	81
+01	01	内服	0	82
+04	04	注射	0	82
+06	06	外用	0	82
+01	01	内服	0	83
+04	04	注射	0	83
+06	06	外用	0	83
+01	01	内服	0	84
+04	04	注射	0	84
+06	06	外用	0	84
+01	01	内服	0	85
+04	04	注射	0	85
+06	06	外用	0	85
+01	01	内服	0	86
+04	04	注射	0	86
+06	06	外用	0	86
+01	01	内服	0	87
+04	04	注射	0	87
+06	06	外用	0	87
+01	01	内服	0	88
+04	04	注射	0	88
+06	06	外用	0	88
+01	01	内服	0	89
+04	04	注射	0	89
+06	06	外用	0	89
+01	01	内服	0	90
+04	04	注射	0	90
+06	06	外用	0	90
+01	01	内服	0	91
+04	04	注射	0	91
+06	06	外用	0	91
+01	01	内服	0	92
+04	04	注射	0	92
+06	06	外用	0	92
+01	01	内服	0	93
+04	04	注射	0	93
+06	06	外用	0	93
+01	01	内服	0	94
+04	04	注射	0	94
+06	06	外用	0	94
+01	01	内服	0	95
+04	04	注射	0	95
+06	06	外用	0	95
+01	01	内服	0	96
+04	04	注射	0	96
+06	06	外用	0	96
+01	01	内服	0	97
+04	04	注射	0	97
+06	06	外用	0	97
+01	01	内服	0	98
+04	04	注射	0	98
+06	06	外用	0	98
+01	01	内服	0	99
+04	04	注射	0	99
+06	06	外用	0	99
+\.
+
+
+--
+-- Data for TOC entry 34 (OID 637356)
+-- Name: t_stocking; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY t_stocking (stc_id, stc_date, stc_cd, cont_id, item_no, stc_unit, stc_num, tax_flg, amount, discount, stc_amount, tax, pack3_num, pack2_num, pack1_num, del_flg, slip_no, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 35 (OID 637360)
+-- Name: t_stock; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY t_stock (yyyymm, item_no, unit_price, amount, before_stock, stocking_num, expend_num, adjust_num, stock_num, med_kind1, med_kind2, med_kind3, del_flg, total_num, total_amount, back_num, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 36 (OID 637364)
+-- Name: t_expend; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY t_expend (exp_date, orca_user, orca_med_cd, insurance, expend_num, name, orca_user_no, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 37 (OID 637368)
+-- Name: t_stock_list02; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY t_stock_list02 (item_no, med_nm, expend_rank, margin_rank, med_price, stc_price, margin, unit_nm, expend_num, expend_price, margin_price, med_kind1, hospnum) FROM stdin;
+\.
+
+
+--
+-- Data for TOC entry 38 (OID 637370)
+-- Name: t_stock_invent; Type: TABLE DATA; Schema: public; Owner: stock
+--
+
+COPY t_stock_invent (yyyymm, item_no, stock_theory, stock_truth, flag_truth, hospnum) FROM stdin;
+\.
+
+
+--
+-- TOC entry 23 (OID 637375)
+-- Name: sk_t_stocking; Type: INDEX; Schema: public; Owner: stock
+--
+
+CREATE INDEX sk_t_stocking ON t_stocking USING btree (stc_date);
+
+
+--
+-- TOC entry 19 (OID 637376)
+-- Name: pk_m_cont_item; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY m_cont_item
+    ADD CONSTRAINT pk_m_cont_item PRIMARY KEY (cont_id, orca_med_cd, item_no, hospnum);
+
+
+--
+-- TOC entry 18 (OID 637378)
+-- Name: pk_m_contractor; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY m_contractor
+    ADD CONSTRAINT pk_m_contractor PRIMARY KEY (cont_id, hospnum);
+
+
+--
+-- TOC entry 21 (OID 637380)
+-- Name: pk_m_med_kind; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY m_med_kind
+    ADD CONSTRAINT pk_m_med_kind PRIMARY KEY (stock_med_kind, orca_med_kind, hospnum);
+
+
+--
+-- TOC entry 20 (OID 637382)
+-- Name: pk_m_orca_medicine; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY m_orca_medicine
+    ADD CONSTRAINT pk_m_orca_medicine PRIMARY KEY (orca_med_cd, day_from, day_to, hospnum);
+
+
+--
+-- TOC entry 25 (OID 637384)
+-- Name: pk_t_expend; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY t_expend
+    ADD CONSTRAINT pk_t_expend PRIMARY KEY (exp_date, orca_user, orca_med_cd, hospnum);
+
+
+--
+-- TOC entry 24 (OID 637386)
+-- Name: pk_t_stock; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY t_stock
+    ADD CONSTRAINT pk_t_stock PRIMARY KEY (yyyymm, item_no, hospnum);
+
+
+--
+-- TOC entry 22 (OID 637388)
+-- Name: pk_t_stocking; Type: CONSTRAINT; Schema: public; Owner: stock
+--
+
+ALTER TABLE ONLY t_stocking
+    ADD CONSTRAINT pk_t_stocking PRIMARY KEY (stc_id, hospnum);
+
+
+--
+-- TOC entry 6 (OID 637336)
+-- Name: sq_contractor; Type: SEQUENCE SET; Schema: public; Owner: stock
+--
+
+SELECT pg_catalog.setval('sq_contractor', 1, false);
+
+
+--
+-- TOC entry 8 (OID 637338)
+-- Name: sq_stocking; Type: SEQUENCE SET; Schema: public; Owner: stock
+--
+
+SELECT pg_catalog.setval('sq_stocking', 1, false);
+
+
+SET SESSION AUTHORIZATION 'postgres';
+
+--
+-- TOC entry 3 (OID 2200)
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS 'Standard public schema';
+
+

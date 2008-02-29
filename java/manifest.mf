@@ -1,0 +1,2 @@
+Main-Class: drugstock.cl.DrugStock
+Class-Path: pgjdbc2.jar, pg73jdbc3.jar, jbcl.jar
