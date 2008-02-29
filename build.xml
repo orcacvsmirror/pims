@@ -10,7 +10,7 @@
 	<property name="v1" value="0"/>
 	<property name="v2" value="3"/>
 	<property name="v3" value="1"/>
-	<property name="v4" value="5"/>
+	<property name="v4" value="6"/>
     <property name="version" value="${v1}${v2}.${v3}${v4}"/>
     <property name="version.int" value="${v1}${v2}${v3}${v4}"/>
 
